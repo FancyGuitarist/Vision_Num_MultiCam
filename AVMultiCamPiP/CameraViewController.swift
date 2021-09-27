@@ -378,7 +378,22 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 			return false
 		}
 		session.addOutputWithNoConnections(backCameraVideoDataOutput)
-		backCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+		// Check if CVPixelFormat Lossy or Lossless Compression is supported
+		
+		if backCameraVideoDataOutput.availableVideoPixelFormatTypes.contains(kCVPixelFormatType_Lossy_32BGRA) {
+			// Set the Lossy format
+			print("Selecting lossy pixel format")
+			backCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_Lossy_32BGRA)]
+		} else if backCameraVideoDataOutput.availableVideoPixelFormatTypes.contains(kCVPixelFormatType_Lossless_32BGRA) {
+			// Set the Lossless format
+			print("Selecting a lossless pixel format")
+			backCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_Lossless_32BGRA)]
+		} else {
+			// Set to the fallback format
+			print("Selecting a 32BGRA pixel format")
+			backCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+		}
+		
 		backCameraVideoDataOutput.setSampleBufferDelegate(self, queue: dataOutputQueue)
 		
 		// Connect the back camera device input to the back camera video data output
@@ -446,7 +461,19 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 			return false
 		}
 		session.addOutputWithNoConnections(frontCameraVideoDataOutput)
-		frontCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+		// Check if CVPixelFormat Lossy or Lossless Compression is supported
+		
+		if frontCameraVideoDataOutput.availableVideoPixelFormatTypes.contains(kCVPixelFormatType_Lossy_32BGRA) {
+			// Set the Lossy format
+			frontCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_Lossy_32BGRA)]
+		} else if frontCameraVideoDataOutput.availableVideoPixelFormatTypes.contains(kCVPixelFormatType_Lossless_32BGRA) {
+			// Set the Lossless format
+			frontCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_Lossless_32BGRA)]
+		} else {
+			// Set to the fallback format
+			frontCameraVideoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+		}
+
 		frontCameraVideoDataOutput.setSampleBufferDelegate(self, queue: dataOutputQueue)
 		
 		// Connect the front camera device input to the front camera video data output
@@ -886,7 +913,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 			let formatDescription = CMSampleBufferGetFormatDescription(fullScreenSampleBuffer) else {
 				return
 		}
-		
+				
 		guard let pipSampleBuffer = currentPiPSampleBuffer,
 			let pipPixelBuffer = CMSampleBufferGetImageBuffer(pipSampleBuffer) else {
 				return
@@ -907,11 +934,14 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 														return
 		}
 		
+		guard let outputFormatDescription = videoMixer.outputFormatDescription else { return }
+
 		// If we're recording, append this buffer to the movie
 		if let recorder = movieRecorder,
 			recorder.isRecording {
 			guard let finalVideoSampleBuffer = createVideoSampleBufferWithPixelBuffer(mixedPixelBuffer,
-																						   presentationTime: CMSampleBufferGetPresentationTimeStamp(fullScreenSampleBuffer)) else {
+																					  formatDescription: outputFormatDescription,
+																					  presentationTime: CMSampleBufferGetPresentationTimeStamp(fullScreenSampleBuffer)) else {
 																							print("Error: Unable to create sample buffer from pixelbuffer")
 																							return
 			}
@@ -942,12 +972,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 			recorder.recordAudio(sampleBuffer: sampleBuffer)
 		}
 	}
-	
-	private func createVideoSampleBufferWithPixelBuffer(_ pixelBuffer: CVPixelBuffer, presentationTime: CMTime) -> CMSampleBuffer? {
-		guard let videoTrackSourceFormatDescription = videoTrackSourceFormatDescription else {
-			return nil
-		}
-		
+
+	private func createVideoSampleBufferWithPixelBuffer(_ pixelBuffer: CVPixelBuffer, formatDescription: CMFormatDescription, presentationTime: CMTime) -> CMSampleBuffer? {
 		var sampleBuffer: CMSampleBuffer?
 		var timingInfo = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: presentationTime, decodeTimeStamp: .invalid)
 		
@@ -956,7 +982,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 													 dataReady: true,
 													 makeDataReadyCallback: nil,
 													 refcon: nil,
-													 formatDescription: videoTrackSourceFormatDescription,
+													 formatDescription: formatDescription,
 													 sampleTiming: &timingInfo,
 													 sampleBufferOut: &sampleBuffer)
 		if sampleBuffer == nil {

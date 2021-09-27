@@ -19,7 +19,7 @@ class PiPVideoMixer {
 
 	private(set) var inputFormatDescription: CMFormatDescription?
 	
-	private(set) var outputFormatDescription: CMFormatDescription?
+	var outputFormatDescription: CMFormatDescription?
 	
 	private var outputPixelBufferPool: CVPixelBufferPool?
 	
@@ -128,12 +128,14 @@ class PiPVideoMixer {
 				return nil
 		}
 		
-		commandEncoder.label = "pip Video Mixer"
+		commandEncoder.label = "PiP Video Mixer"
 		commandEncoder.setComputePipelineState(computePipelineState)
 		commandEncoder.setTexture(fullScreenTexture, index: 0)
 		commandEncoder.setTexture(pipTexture, index: 1)
 		commandEncoder.setTexture(outputTexture, index: 2)
-		commandEncoder.setBytes(UnsafeMutableRawPointer(&parameters), length: MemoryLayout<MixerParameters>.size, index: 0)
+		withUnsafeMutablePointer(to: &parameters) { parametersRawPointer in
+			commandEncoder.setBytes(parametersRawPointer, length: MemoryLayout<MixerParameters>.size, index: 0)
+		}
 		
 		// Set up thread groups as described in https://developer.apple.com/reference/metal/mtlcomputecommandencoder
 		let width = computePipelineState.threadExecutionWidth
