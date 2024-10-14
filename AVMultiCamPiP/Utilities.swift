@@ -1,5 +1,5 @@
 /*
-See LICENSE folder for this sample’s licensing information.
+See the LICENSE.txt file for this sample’s licensing information.
 
 Abstract:
 Utilities
@@ -82,7 +82,7 @@ extension AVCaptureConnection {
 	}
 }
 
-extension AVCaptureSession.InterruptionReason: CustomStringConvertible {
+extension AVCaptureSession.InterruptionReason: @retroactive CustomStringConvertible {
 	public var description: String {
 		var descriptionString = ""
 		
