@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14784.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
-    <device id="retina6_1" orientation="portrait"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14740.3"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -16,19 +17,19 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WOD-qV-bPs" customClass="PreviewView" customModule="AVMultiCamPiP" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="85" width="414" height="736"/>
+                                <rect key="frame" x="0.0" y="87" width="414" height="736"/>
                                 <constraints>
                                     <constraint firstAttribute="height" secondItem="WOD-qV-bPs" secondAttribute="width" multiplier="16:9" id="hFe-b4-Urr"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iLU-Vt-ZWG" customClass="PreviewView" customModule="AVMultiCamPiP" customModuleProvider="target">
-                                <rect key="frame" x="290.5" y="617" width="103.5" height="184"/>
+                                <rect key="frame" x="290.5" y="619" width="103.5" height="184"/>
                                 <constraints>
                                     <constraint firstAttribute="height" secondItem="iLU-Vt-ZWG" secondAttribute="width" multiplier="16:9" id="QG3-je-SN8"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SLg-cy-w81">
-                                <rect key="frame" x="167" y="771" width="80" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SLg-cy-w81">
+                                <rect key="frame" x="167" y="773" width="80" height="30"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="80" id="RvO-1k-mW6"/>
@@ -48,14 +49,14 @@
                                 </connections>
                             </button>
                             <label hidden="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Camera Unavailable" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MNA-vj-IrB" userLabel="Camera Unavailable">
-                                <rect key="frame" x="103" y="438.5" width="208" height="29"/>
+                                <rect key="frame" x="103.5" y="440.5" width="207" height="29"/>
                                 <color key="tintColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <color key="textColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wvi-Ng-fni" userLabel="Resume">
-                                <rect key="frame" x="124.5" y="433.5" width="165" height="39"/>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wvi-Ng-fni" userLabel="Resume">
+                                <rect key="frame" x="124.5" y="435.5" width="165" height="39"/>
                                 <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
@@ -72,6 +73,7 @@
                                 </connections>
                             </button>
                         </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="iLU-Vt-ZWG" firstAttribute="height" secondItem="6Tk-OE-BBY" secondAttribute="height" priority="750" id="0S6-e3-tZV"/>
@@ -100,19 +102,18 @@
                             <constraint firstItem="iLU-Vt-ZWG" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="wN6-KE-9X0"/>
                             <constraint firstItem="WOD-qV-bPs" firstAttribute="trailing" secondItem="iLU-Vt-ZWG" secondAttribute="trailing" constant="20" id="y87-Ip-Qs2"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <variation key="default">
                             <mask key="constraints">
                                 <exclude reference="BRl-PN-Pzt"/>
-                                <exclude reference="0S6-e3-tZV"/>
                                 <exclude reference="B3b-I8-s9B"/>
-                                <exclude reference="B65-ob-5dG"/>
-                                <exclude reference="DJf-Bd-t7k"/>
-                                <exclude reference="VpE-0D-oqJ"/>
                                 <exclude reference="Vvl-0c-ZsQ"/>
-                                <exclude reference="caM-iA-YUA"/>
-                                <exclude reference="oVe-se-OVR"/>
                                 <exclude reference="wN6-KE-9X0"/>
+                                <exclude reference="oVe-se-OVR"/>
+                                <exclude reference="B65-ob-5dG"/>
+                                <exclude reference="VpE-0D-oqJ"/>
+                                <exclude reference="DJf-Bd-t7k"/>
+                                <exclude reference="0S6-e3-tZV"/>
+                                <exclude reference="caM-iA-YUA"/>
                             </mask>
                         </variation>
                     </view>

@@ -337,16 +337,33 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 	}
 	
 	private func configureBackCamera() -> Bool {
+        print("Configuring Back Camera")
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [
+            .builtInWideAngleCamera,
+            .builtInUltraWideCamera,
+            .builtInTelephotoCamera,
+            .builtInDualCamera,
+            .builtInTripleCamera,
+        ]
+        
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .video, position: .back)
+        let devices = discoverySession.devices
+        
+        guard let backCamera = devices.first(where: { $0.deviceType == .builtInWideAngleCamera }) else {
+            print("Wide camera not available on this device.")
+            return false
+        }
+        
 		session.beginConfiguration()
 		defer {
 			session.commitConfiguration()
 		}
 		
 		// Find the back camera
-		guard let backCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
-			print("Could not find the back camera")
-			return false
-		}
+//		guard let backCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+//			print("Could not find the back camera")
+//			return false
+//		}
 		
 		// Add the back camera input to the session
 		do {
@@ -416,20 +433,40 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 		}
 		session.addConnection(backCameraVideoPreviewLayerConnection)
 		
+        print("Done Configuring Back Camera")
 		return true
 	}
 	
 	private func configureFrontCamera() -> Bool {
+        print("Configuring Front Camera")
+        let deviceTypes: [AVCaptureDevice.DeviceType] = [
+            .builtInWideAngleCamera,
+            .builtInUltraWideCamera,
+            .builtInTelephotoCamera,
+            .builtInDualCamera,
+            .builtInTripleCamera,
+        ]
+        
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes, mediaType: .video, position: .back)
+        let devices = discoverySession.devices
+        
+        guard let frontCamera = devices.first(where: { $0.deviceType == .builtInUltraWideCamera }) else {
+            print("Ultra Wide camera not available on this device.")
+            return false
+        }
+        print("Beginning configuration for front camera")
 		session.beginConfiguration()
+        print("Configuration started for front camera")
 		defer {
+            print("Closing configuration for front camera")
 			session.commitConfiguration()
 		}
 		
 		// Find the front camera
-		guard let frontCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
-			print("Could not find the front camera")
-			return false
-		}
+//		guard let frontCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+//			print("Could not find the front camera")
+//			return false
+//		}
 		
 		// Add the front camera input to the session
 		do {
@@ -460,6 +497,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 			print("Could not add the front camera video data output")
 			return false
 		}
+        print("Adding front camera video data output")
 		session.addOutputWithNoConnections(frontCameraVideoDataOutput)
 		// Check if CVPixelFormat Lossy or Lossless Compression is supported
 		
@@ -477,12 +515,14 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 		frontCameraVideoDataOutput.setSampleBufferDelegate(self, queue: dataOutputQueue)
 		
 		// Connect the front camera device input to the front camera video data output
+        print("Adding front camera video data output connection")
 		let frontCameraVideoDataOutputConnection = AVCaptureConnection(inputPorts: [frontCameraVideoPort], output: frontCameraVideoDataOutput)
 		guard session.canAddConnection(frontCameraVideoDataOutputConnection) else {
 			print("Could not add a connection to the front camera video data output")
 			return false
 		}
 		session.addConnection(frontCameraVideoDataOutputConnection)
+        print("Connection added for front camera video data output")
 		frontCameraVideoDataOutputConnection.videoOrientation = .portrait
 		frontCameraVideoDataOutputConnection.automaticallyAdjustsVideoMirroring = false
 		frontCameraVideoDataOutputConnection.isVideoMirrored = true
@@ -496,10 +536,13 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 			print("Could not add a connection to the front camera video preview layer")
 			return false
 		}
+        print("Adding connection for front camera video preview layer")
 		session.addConnection(frontCameraVideoPreviewLayerConnection)
-		frontCameraVideoPreviewLayerConnection.automaticallyAdjustsVideoMirroring = false
-		frontCameraVideoPreviewLayerConnection.isVideoMirrored = true
+        print("Added connection for front camera video preview layer")
+//		frontCameraVideoPreviewLayerConnection.automaticallyAdjustsVideoMirroring = false
+//		frontCameraVideoPreviewLayerConnection.isVideoMirrored = true
 		
+        print("Done Configuring Front Camera")
 		return true
 	}
 	
