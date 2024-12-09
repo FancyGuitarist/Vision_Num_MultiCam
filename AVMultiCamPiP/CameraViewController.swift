@@ -8,10 +8,14 @@ Implements the view controller for the camera interface.
 import UIKit
 import AVFoundation
 import Photos
+import CoreMotion
 
 class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
 	
 	// MARK: View Controller Life Cycle
+    let motionManager = CMMotionManager()
+    var accelLabel: UILabel!
+    var gyroLabel: UILabel!
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -49,6 +53,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 		sessionQueue.async {
 			self.configureSession()
 		}
+        setupMotionManager()
+        setupOverlay()
 		
 		// Keep the screen awake
 		UIApplication.shared.isIdleTimerDisabled = true
@@ -300,6 +306,57 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 	private let backMicrophoneAudioDataOutput = AVCaptureAudioDataOutput()
 	
 	private let frontMicrophoneAudioDataOutput = AVCaptureAudioDataOutput()
+    
+    func setupMotionManager() {
+        if motionManager.isAccelerometerAvailable {
+            motionManager.accelerometerUpdateInterval = 1.0 / 60.0 // 60 Hz
+            motionManager.startAccelerometerUpdates(to: OperationQueue.main) { (data, error) in
+                if let accelerometerData = data {
+                    self.updateOverlayWithAccelerometerData(accelerometerData)
+                }
+            }
+        }
+
+        if motionManager.isGyroAvailable {
+            motionManager.gyroUpdateInterval = 1.0 / 60.0 // 60 Hz
+            motionManager.startGyroUpdates(to: OperationQueue.main) { (data, error) in
+                if let gyroData = data {
+                    self.updateOverlayWithGyroData(gyroData)
+                }
+            }
+        }
+    }
+
+    func setupOverlay() {
+            let labelWidth = view.frame.width / 2
+            let labelHeight: CGFloat = 50
+
+            accelLabel = UILabel(frame: CGRect(x: 0, y: 50, width: labelWidth, height: labelHeight))
+            accelLabel.textColor = .white
+            accelLabel.font = UIFont.systemFont(ofSize: 12)
+            accelLabel.textAlignment = .left
+            view.addSubview(accelLabel)
+
+            gyroLabel = UILabel(frame: CGRect(x: labelWidth, y: 50, width: labelWidth, height: labelHeight))
+            gyroLabel.textColor = .white
+            gyroLabel.font = UIFont.systemFont(ofSize: 12)
+            gyroLabel.textAlignment = .right
+            view.addSubview(gyroLabel)
+        }
+
+        func updateOverlayWithAccelerometerData(_ data: CMAccelerometerData) {
+            let x = data.acceleration.x
+            let y = data.acceleration.y
+            let z = data.acceleration.z
+            accelLabel.text = String(format: "Accel: x=%.2f, y=%.2f, z=%.2f", x, y, z)
+        }
+
+        func updateOverlayWithGyroData(_ data: CMGyroData) {
+            let x = data.rotationRate.x
+            let y = data.rotationRate.y
+            let z = data.rotationRate.z
+            gyroLabel.text = String(format: "Gyro: x=%.2f, y=%.2f, z=%.2f", x, y, z)
+        }
 	
 	// Must be called on the session queue
 	private func configureSession() {
@@ -337,7 +394,6 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 	}
 	
 	private func configureBackCamera() -> Bool {
-        print("Configuring Back Camera")
         let deviceTypes: [AVCaptureDevice.DeviceType] = [
             .builtInWideAngleCamera,
             .builtInUltraWideCamera,
