@@ -581,7 +581,6 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         print("Connection added for front camera video data output")
 		frontCameraVideoDataOutputConnection.videoOrientation = .portrait
 		frontCameraVideoDataOutputConnection.automaticallyAdjustsVideoMirroring = false
-		frontCameraVideoDataOutputConnection.isVideoMirrored = true
 
 		// Connect the front camera device input to the front camera video preview layer
 		guard let frontCameraVideoPreviewLayer = frontCameraVideoPreviewLayer else {
@@ -1003,51 +1002,46 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 		}
 	}
 	
-	private func processFullScreenSampleBuffer(_ fullScreenSampleBuffer: CMSampleBuffer) {
-		guard renderingEnabled else {
-			return
-		}
-		
-		guard let fullScreenPixelBuffer = CMSampleBufferGetImageBuffer(fullScreenSampleBuffer),
-			let formatDescription = CMSampleBufferGetFormatDescription(fullScreenSampleBuffer) else {
-				return
-		}
-				
-		guard let pipSampleBuffer = currentPiPSampleBuffer,
-			let pipPixelBuffer = CMSampleBufferGetImageBuffer(pipSampleBuffer) else {
-				return
-		}
-		
-		if !videoMixer.isPrepared {
-			videoMixer.prepare(with: formatDescription, outputRetainedBufferCountHint: 3)
-		}
-		
-		videoMixer.pipFrame = normalizedPipFrame
-		
-		// Mix the full screen pixel buffer with the pip pixel buffer
-		// When the PIP is the back camera, the primaryPixelBuffer is the front camera
-		guard let mixedPixelBuffer = videoMixer.mix(fullScreenPixelBuffer: fullScreenPixelBuffer,
-													pipPixelBuffer: pipPixelBuffer,
-													fullScreenPixelBufferIsFrontCamera: pipDevicePosition == .back) else {
-														print("Unable to combine video")
-														return
-		}
-		
-		guard let outputFormatDescription = videoMixer.outputFormatDescription else { return }
-
-		// If we're recording, append this buffer to the movie
-		if let recorder = movieRecorder,
-			recorder.isRecording {
-			guard let finalVideoSampleBuffer = createVideoSampleBufferWithPixelBuffer(mixedPixelBuffer,
-																					  formatDescription: outputFormatDescription,
-																					  presentationTime: CMSampleBufferGetPresentationTimeStamp(fullScreenSampleBuffer)) else {
-																							print("Error: Unable to create sample buffer from pixelbuffer")
-																							return
-			}
-			
-			recorder.recordVideo(sampleBuffer: finalVideoSampleBuffer)
-		}
-	}
+    private func processFullScreenSampleBuffer(_ fullScreenSampleBuffer: CMSampleBuffer) {
+        guard renderingEnabled else {
+            return
+        }
+        
+        guard let fullScreenPixelBuffer = CMSampleBufferGetImageBuffer(fullScreenSampleBuffer),
+              let formatDescription = CMSampleBufferGetFormatDescription(fullScreenSampleBuffer) else {
+            return
+        }
+        
+        guard let pipSampleBuffer = currentPiPSampleBuffer,
+              let pipPixelBuffer = CMSampleBufferGetImageBuffer(pipSampleBuffer) else {
+            return
+        }
+        
+        if !videoMixer.isPrepared {
+            videoMixer.prepare(with: formatDescription, outputRetainedBufferCountHint: 3)
+        }
+        
+        // Mix the full screen pixel buffer with the pip pixel buffer
+        guard let mixedPixelBuffer = videoMixer.mix(leftPixelBuffer: fullScreenPixelBuffer,
+                                                    rightPixelBuffer: pipPixelBuffer) else {
+            print("Unable to combine video")
+            return
+        }
+        
+        guard let outputFormatDescription = videoMixer.outputFormatDescription else { return }
+        // If we're recording, append this buffer to the movie
+        if let recorder = movieRecorder,
+           recorder.isRecording {
+            guard let finalVideoSampleBuffer = createVideoSampleBufferWithPixelBuffer(mixedPixelBuffer,
+                                                                                      formatDescription: outputFormatDescription,
+                                                                                      presentationTime: CMSampleBufferGetPresentationTimeStamp(fullScreenSampleBuffer)) else {
+                print("Error: Unable to create sample buffer from pixelbuffer")
+                return
+            }
+            
+            recorder.recordVideo(sampleBuffer: finalVideoSampleBuffer)
+        }
+    }
 	
 	private func processPiPSampleBuffer(_ pipSampleBuffer: CMSampleBuffer) {
 		guard renderingEnabled else {

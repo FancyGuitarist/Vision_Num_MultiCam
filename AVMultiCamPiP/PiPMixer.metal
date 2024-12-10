@@ -1,47 +1,39 @@
-/*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-Shader that renders two input textures with one as a PiP and the other full screen.
-*/
-
 #include <metal_stdlib>
 using namespace metal;
 
-struct MixerParameters
-{
-	float2 pipPosition;
-	float2 pipSize;
+struct MixerParameters {
+    float2 topPosition;
+    float2 topSize;
+    float2 bottomPosition;
+    float2 bottomSize;
 };
 
-constant sampler kBilinearSampler(filter::linear,  coord::pixel, address::clamp_to_edge);
+constant sampler kBilinearSampler(filter::linear, coord::pixel, address::clamp_to_edge);
 
 // Compute kernel
-kernel void reporterMixer(texture2d<half, access::read>		fullScreenInput		[[ texture(0) ]],
-						  texture2d<half, access::sample>	pipInput			[[ texture(1) ]],
-						  texture2d<half, access::write>	outputTexture		[[ texture(2) ]],
-						  const device    MixerParameters&	mixerParameters		[[ buffer(0) ]],
-						  uint2 gid [[thread_position_in_grid]])
+kernel void splitScreenMixer(texture2d<half, access::read> topInput [[ texture(0) ]],
+                             texture2d<half, access::read> bottomInput [[ texture(1) ]],
+                             texture2d<half, access::write> outputTexture [[ texture(2) ]],
+                             const device MixerParameters& mixerParameters [[ buffer(0) ]],
+                             uint2 gid [[thread_position_in_grid]]) {
+    half4 output;
 
-{
-	uint2 pipPosition = uint2(mixerParameters.pipPosition);
-	uint2 pipSize = uint2(mixerParameters.pipSize);
+    // Calculate normalized coordinates
+    float2 uv = float2(gid) / float2(outputTexture.get_width(), outputTexture.get_height());
 
-	half4 output;
+    if (uv.y < 0.5) {
+        // Top half
+        float aspectRatio = float(topInput.get_width()) / float(topInput.get_height());
+        float2 topUV = uv * float2(1.0, 2.0);
+        topUV.y = (topUV.y - 0.5) * aspectRatio + 0.5; // Adjust for aspect ratio
+        output = topInput.read(uint2(topUV * float2(topInput.get_width(), topInput.get_height())));
+    } else {
+        // Bottom half
+        float aspectRatio = float(bottomInput.get_width()) / float(bottomInput.get_height());
+        float2 bottomUV = (uv - float2(0.0, 0.5)) * float2(1.0, 2.0);
+        bottomUV.y = (bottomUV.y - 0.5) * aspectRatio + 0.5; // Adjust for aspect ratio
+        output = bottomInput.read(uint2(bottomUV * float2(bottomInput.get_width(), bottomInput.get_height())));
+    }
 
-	// Check if the output pixel should be from full screen or PIP
-	if ( (gid.x >= pipPosition.x) && (gid.y >= pipPosition.y) &&
-		 (gid.x < (pipPosition.x + pipSize.x)) && (gid.y < (pipPosition.y + pipSize.y)) )
-	{
-		// Position and scale the PIP window
-		float2 pipSamplingCoord =  float2(gid - pipPosition) * float2(pipInput.get_width(), pipInput.get_height()) / float2(pipSize);
-		output = pipInput.sample(kBilinearSampler, pipSamplingCoord + 0.5);
-	}
-	else
-	{
-		output = fullScreenInput.read(gid);
-	}
-
-	outputTexture.write(output, gid);
+    outputTexture.write(output, gid);
 }
-
