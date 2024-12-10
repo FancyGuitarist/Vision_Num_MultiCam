@@ -326,6 +326,16 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             }
         }
     }
+    
+    func setZoomFactor(for device: AVCaptureDevice, to factor: CGFloat) {
+        do {
+            try device.lockForConfiguration()
+            device.videoZoomFactor = factor
+            device.unlockForConfiguration()
+        } catch {
+            print("Error setting zoom factor: \(error)")
+        }
+    }
 
     func setupOverlay() {
             let labelWidth = view.frame.width / 2
@@ -409,6 +419,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             print("Wide camera not available on this device.")
             return false
         }
+        
+        setZoomFactor(for: backCamera, to: 1) // Adjust the zoom factor as needed
         
 		session.beginConfiguration()
 		defer {
@@ -510,6 +522,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             print("Ultra Wide camera not available on this device.")
             return false
         }
+        setZoomFactor(for: frontCamera, to: 2) // Adjust the zoom factor as needed
         print("Beginning configuration for front camera")
 		session.beginConfiguration()
         print("Configuration started for front camera")
