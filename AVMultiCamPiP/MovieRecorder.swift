@@ -108,8 +108,6 @@ class MovieRecorder {
         var transform = CATransform3DIdentity
         transform = CATransform3DRotate(transform, .pi, 1.0, 0.0, 0.0)
         watermarkLayer.transform = transform
-
-        print("Watermark Layer Frame: \(watermarkLayer.frame)")
         
         return watermarkLayer
     }

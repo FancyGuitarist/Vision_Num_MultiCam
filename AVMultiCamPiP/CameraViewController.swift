@@ -336,6 +336,10 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             print("Error setting zoom factor: \(error)")
         }
     }
+    
+    func getFocalLength(for device: AVCaptureDevice) -> Float? {
+        return device.activeFormat.videoFieldOfView
+    }
 
     func setupOverlay() {
             let labelWidth = view.frame.width / 2
@@ -421,6 +425,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         }
         
         setZoomFactor(for: backCamera, to: 1) // Adjust the zoom factor as needed
+        let focalLength = getFocalLength(for: backCamera)
+        print("Wide camera focal length: \(focalLength ?? 0) mm")
         
 		session.beginConfiguration()
 		defer {
@@ -523,6 +529,9 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             return false
         }
         setZoomFactor(for: frontCamera, to: 2) // Adjust the zoom factor as needed
+        let focalLength = getFocalLength(for: frontCamera)
+        print("Ultra Wide camera focal length: \(focalLength ?? 0) mm")
+        
         print("Beginning configuration for front camera")
 		session.beginConfiguration()
         print("Configuration started for front camera")
